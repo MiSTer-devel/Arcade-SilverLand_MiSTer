@@ -1,5 +1,7 @@
 ---------------------------------------------------------------------------------
 -- 
+-- NOTE: THERE ARE KNOWN TRANSPARENCY PROBLEMS -- please fix it!
+--
 -- Arcade: Silver Land port to MiSTer 
 -- based on Arcade: Crazy Climber port to MiSTer by Sorgelig
 -- 7 June 2018
