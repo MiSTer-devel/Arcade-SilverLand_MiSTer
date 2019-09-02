@@ -14,7 +14,7 @@ architecture prom of cclimber_palette is
 	signal rom_data: rom := (
               X"F6",X"E0",X"07",X"07",X"00",X"F4",X"01",X"01",X"F6",X"C7",X"00",X"00",X"00",X"6F",X"00",X"6F",
               X"00",X"3F",X"00",X"3F",X"00",X"A7",X"00",X"A7",X"00",X"E0",X"FF",X"E0",X"00",X"FF",X"00",X"FF",
-              X"00",X"00",X"9C",X"7E",X"00",X"00",X"9C",X"07",X"F6",X"00",X"00",X"00",X"00",X"FF",X"BE",X"00",
+              X"F6",X"00",X"9C",X"7E",X"F6",X"00",X"9C",X"07",X"F6",X"00",X"00",X"00",X"00",X"FF",X"BE",X"00",
               X"00",X"00",X"FF",X"07",X"00",X"87",X"87",X"00",X"F6",X"38",X"A7",X"1A",X"00",X"FA",X"FA",X"07");
 begin
 process(clk)
