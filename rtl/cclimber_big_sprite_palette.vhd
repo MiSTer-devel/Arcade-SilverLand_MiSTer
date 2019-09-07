@@ -12,8 +12,8 @@ end entity;
 architecture prom of cclimber_big_sprite_palette is
 	type rom is array(0 to  31) of std_logic_vector(7 downto 0);
 	signal rom_data: rom := (
-	X"00",X"D2",X"F7",X"07",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",
-	X"00",X"00",X"00",X"00",X"00",X"F7",X"F7",X"F7",X"F7",X"F7",X"F7",X"F7",X"F7",X"F7",X"F7",X"F7");
+		X"00",X"F7",X"D2",X"07",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",
+		X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00",X"00");
 begin
 process(clk)
 begin
