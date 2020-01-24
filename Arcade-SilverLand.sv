@@ -100,14 +100,15 @@ assign HDMI_ARY = status[1] ? 8'd9  : 8'd3;
 `include "build_id.v" 
 localparam CONF_STR = {
 	"A.SILVLAND;;",
-	"O1,Aspect Ratio,Original,Wide;",
+	"H0O1,Aspect Ratio,Original,Wide;",
 	"O35,Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
 	"-;",
 	"O89,Lives,3,4,5,6;",
 	//"OC,Cabinet,Upright,Cocktail;",	// not sure how to hook this up
 	"-;",
 	"R0,Reset;",
-	"J1,Fire,Start 1P,Start 2P;",
+	"J1,Fire,Start 1P,Start 2P,Coin;",
+	"jn,A,Start,Select,R;",
 	"V,v",`BUILD_DATE
 };
 
@@ -133,6 +134,8 @@ pll pll
 
 wire [31:0] status;
 wire  [1:0] buttons;
+wire        forced_scandoubler;
+wire        direct_video;
 
 wire        ioctl_download;
 wire        ioctl_wr;
@@ -145,7 +148,6 @@ wire [15:0] joystick_0, joystick_1;
 wire [15:0] joy = joystick_0 ;
 wire [15:0] joy1 =  joystick_1;
 
-wire        forced_scandoubler;
 
 wire [21:0] gamma_bus;
 
@@ -159,8 +161,10 @@ hps_io #(.STRLEN($size(CONF_STR)>>3)) hps_io
 
 	.buttons(buttons),
 	.status(status),
+	.status_menumask(direct_video),
 	.forced_scandoubler(forced_scandoubler),
 	.gamma_bus(gamma_bus),
+	.direct_video(direct_video),
 
 	.ioctl_download(ioctl_download),
 	.ioctl_wr(ioctl_wr),
@@ -185,16 +189,16 @@ always @(posedge clk_sys) begin
 			'hX6B: btn_left        <= pressed; // left
 			'hX74: btn_right       <= pressed; // right
 
-			'hX1D: btn_up         <= pressed; // W
-			'hX1C: btn_left_2       <= pressed; // A
-			'hX1B: btn_down_2       <= pressed; // S
-			'hX23: btn_right_2      <= pressed; // D
-         'h029: btn_fire        <= pressed; // space
-         'h014: btn_fire        <= pressed; // ctrl
-         'h01C: btn_fire_2      <= pressed; // A
+			'hX1D: btn_up          <= pressed; // W
+			'hX1C: btn_left_2      <= pressed; // A
+			'hX1B: btn_down_2      <= pressed; // S
+			'hX23: btn_right_2     <= pressed; // D
+			'h029: btn_fire        <= pressed; // space
+			'h014: btn_fire        <= pressed; // ctrl
+			'h01C: btn_fire_2      <= pressed; // A
 
-			'h005: btn_one_player  <= pressed; // F1
-			'h006: btn_two_players <= pressed; // F2
+			'h005: btn_start_1     <= pressed; // F1
+			'h006: btn_start_2     <= pressed; // F2
 			// JPAC/IPAC/MAME Style Codes
 			'h016: btn_start_1     <= pressed; // 1
 			'h01E: btn_start_2     <= pressed; // 2
@@ -214,8 +218,6 @@ reg btn_down_2  = 0;
 reg btn_right_2 = 0;
 reg btn_left_2  = 0;
 reg btn_fire_2 =0;
-reg btn_one_player  = 0;
-reg btn_two_players = 0;
 reg btn_start_1=0;
 reg btn_start_2=0;
 reg btn_coin_1=0;
@@ -231,9 +233,9 @@ wire m_left_2  = btn_left_2   | joy1[1];
 wire m_down_2  = btn_down_2   | joy1[2];
 wire m_up_2    = btn_up_2     | joy1[3];
 wire m_fire_2 = btn_fire_2 | joy1[4];
-wire m_start1 = btn_one_player  | joy[5]|joy1[5];
-wire m_start2 = btn_two_players | joy[6]|joy1[6];
-wire m_coin   = m_start1 | m_start2;
+wire m_start1 = btn_start_1 | joy[5]|joy1[5];
+wire m_start2 = btn_start_2 | joy[6]|joy1[6];
+wire m_coin   = btn_coin_1 | joy[7]|joy1[7];
 
 wire hs, vs;
 wire [2:0] r,g;
@@ -245,23 +247,24 @@ wire HBlank, VBlank;
 
 reg ce_pix;
 always @(posedge clk_sys) begin
-        reg old_clk;
+	reg [1:0] div;
 
-        old_clk <= ce_12;
-        ce_pix <= old_clk & ~ce_12;
+	div <= div + 1'd1;
+	ce_pix <= !div;
 end
 
 
-arcade_fx #(514,8) arcade_video
+arcade_video #(514,446,8) arcade_video
 (
-        .*,
-        .clk_video(clk_sys),
+	.*,
+	.clk_video(clk_sys),
 
-        .RGB_in({r,g,b}),
+	.RGB_in({r,g,b}),
+	.no_rotate(1),
+	.rotate_ccw(0),
 
-        .fx(status[5:3])
+	.fx(status[5:3])
 );
-
 
 wire [15:0] audio;
 assign AUDIO_L = audio;
@@ -299,9 +302,9 @@ crazy_climber crazy_climber
 
 	.audio_out(audio),
 
-	.coin1(m_coin|btn_coin_1|btn_coin_2),
-	.start1(m_start1|btn_start_1),
-	.start2(m_start2|btn_start_2),
+	.coin1(m_coin|btn_coin_2),
+	.start1(m_start1),
+	.start2(m_start2),
 	
 	.right1(m_right),
 	.left1(m_left),
